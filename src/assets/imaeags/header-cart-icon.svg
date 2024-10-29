@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns:svgjs="http://svgjs.com/svgjs"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512"
+	 style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<g>
+	<rect x="42.7" y="42.7" class="st0" width="426.7" height="426.7" fill="#2E2727" />
+	<path class="st1" d="M327.1,149.3h17.8v1.1c0,48.4-39.4,87.8-87.8,87.8h-2.1c-48.4,0-87.8-39.4-87.8-87.8v-1.1h17.8v-35.6h-71.1
+		v35.6h17.8v1.1c0,68,55.3,123.4,123.4,123.4h2.1c68,0,123.4-55.3,123.4-123.4v-1.1h17.8v-35.6h-71.1L327.1,149.3L327.1,149.3z" fill="#D5BDAD" />
+</g>
+</svg>

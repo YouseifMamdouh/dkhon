@@ -1,0 +1,956 @@
+const debug = false;
+
+function log(data, isTimer=true){
+    if(!debug) return;
+
+    if(isTimer){
+        setTimeout(() => {
+            console.log(data);
+        }, 4000);
+    }else{
+        console.log(data);
+    }
+}
+ 
+if(debug){
+    log('******', false);
+}
+
+const  AppCaches = {
+    guestCustomerId : "guestCustomerId",
+    guestDetails : "guestDetails", 
+    lastActionDateTime : "lastActionDateTime",
+    pnames : 'pnsnames',
+    wgid : 'wgid',
+    wgwid : 'wgwid',
+    okguest : 'okguest',
+    isLogin : 'isLogin', 
+    firstActive : 'firstActive',
+    removeListener : 'removeListener',
+    addListener : 'addListener',
+}
+
+if(!window.customer){
+    localStorage.setItem(AppCaches.isLogin, 0); 
+}
+
+const currentUrl = window.location.href; 
+const url = new URL(currentUrl);
+ 
+const params = new URLSearchParams(url.search); 
+const wgid = params.get('wgid');
+const wgwid = params.get('wgwid');
+if(wgid != null) { 
+    localStorage.setItem(AppCaches.wgid, wgid) 
+} 
+if(wgwid != null) { 
+    localStorage.setItem(AppCaches.wgwid, wgwid) 
+} 
+
+ 
+
+const isLogin = localStorage.getItem(AppCaches.isLogin)?? 0;
+
+ 
+if(window.customer && isLogin == 0){
+    let newData = {
+        wgid: localStorage.getItem(AppCaches.wgid)?? null,
+        wgwid: localStorage.getItem(AppCaches.wgwid)?? null,
+        guestCustomerId: localStorage.getItem(AppCaches.guestCustomerId)?? null,
+        cid: window.customer?.id
+    }
+    fetch('https://api.wicckbot.com/api/zid/scripts/guestconverter?tenant=110009', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            if(debug) throw new Error('Network response was not ok');
+        }
+       return response.json();
+    })
+    .then(responseJson => {
+        localStorage.setItem(AppCaches.isLogin, 1)
+    })
+    .catch(error => { 
+        localStorage.setItem(AppCaches.isLogin, 0)
+        if(debug) console.error('There was a problem with your fetch operation:', error);
+    });
+}
+
+
+
+const currentTime = new Date().getTime();
+const lastActionDateTime = localStorage.getItem(AppCaches.lastActionDateTime)?? currentTime;
+if(currentTime == lastActionDateTime){
+    localStorage.setItem(AppCaches.lastActionDateTime, currentTime);
+}
+
+function updateLastRefreshTime() {
+    const oneHourInMillis = 60 * 60 * 1000;
+
+    if (lastActionDateTime) {
+
+      const timeDifference = currentTime - lastActionDateTime;
+      if (timeDifference > oneHourInMillis || currentTime == lastActionDateTime) {
+        const guestDetails = JSON.parse(localStorage.getItem(AppCaches.guestDetails)?? '')?? {};
+        let newData = {
+            guestId: guestDetails['guestId']?? null,
+            action: 'activeOnsite',
+            customer: window.customer?? null,
+            ID: window.customer === undefined? null : window.customer['id']?? null,
+            customer_id: window.customer === undefined? null : window.customer['id']?? null,
+            page: window.location.href,
+            browser: navigator.userAgent,
+            os: navigator.platform,
+            $value: '000.00',
+            wgid: localStorage.getItem(AppCaches.wgid)?? '',
+            wgwid: localStorage.getItem(AppCaches.wgwid)?? ''
+
+        };
+ 
+        fetch('https://api.wicckbot.com/api/zid/scripts/activeOnsite?tenant=110009', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newData)
+        })
+        .then(response => {
+            if (!response.ok) { 
+                if(debug) throw new Error('Network response was not ok'); 
+            }
+            return response.json();
+        })
+        .then(responseJson => { 
+
+        })
+        .catch(error => {
+            if(debug) console.error('There was a problem with your fetch operation:', error);
+        });
+      }
+    }
+
+    localStorage.setItem(AppCaches.lastActionDateTime, currentTime);
+}
+setTimeout(() => {
+    updateLastRefreshTime();
+    localStorage.setItem(AppCaches.lastActionDateTime, currentTime);
+}, 5000);
+
+function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    return result;
+}
+
+const today = new Date();
+const currentDay = today.getDate();
+
+const ipInfoTokens = [
+    'bebaf540f766c5',
+    '5f3f76433c6ba0',
+    '17fa61b3c7d542',
+    'e5ba49e08860d0',
+    '3898aa6420821b',
+    '272e1506527832',
+    'dee7ca7ac8cd2b',
+    '3ef200cb258736',
+    '1a03d6436376d1',
+    'a14a53cc0da26b',
+    '1cc74610af919c',
+    'd118767de6850f',
+    '08e78139b76b98',
+    'a678674c64c608',
+    'f968ed0b562df8',
+    '3f318ad37f5251',
+    '2903d5d8362b35',
+    'edb01b9e220326',
+    '642b3b8232390c',
+    '55ed5dd0b455a0',
+    'e3afe34f5fe5e6',
+    'ecce156bbc2806',
+    '6a5d1622fd79e7',
+    'bd03a2120e2cb1',
+    '9635a57d8bf416',
+    '9245ee392085b4',
+    '5346725848aa80',
+    '0a17cc1d6be6f0',
+    '1e832631506965',
+    '167ff44abd2598',
+    '148c02c93f18eb',
+    'c4f86296af85c7',
+    '6591f15c62a751',
+    '0561885b2c196c',
+    'fe5f47d326da8c',
+    'e97a4b05092f8e',
+    '7aecbaddd139dd',
+    'b96769f660c0a1',
+    'c0b0019fe77688',
+    'a838f3a55784e7',
+    '7800ab7f09c23b',
+    '95e76943f8d916',
+    '0e6e39693c634b',
+    'c5da90a627dd49',
+    'c780ecad3d9cec',
+    'ea66ed48f99316',
+    '069a5074587a81',
+    'bc4e5fd436bf3b',
+    '66b10b5d91433c',
+    'f08b4cff5f6f47',
+    '99506709e0a305',
+    '2ea0870b7b9b70',
+    '08acd50fe31c9d',
+    'fa70c33afe1de7',
+    '64e0f6c03a4bac',
+    '039ab1168a811f',
+    '2963fc51bb007f',
+    'ec964399e6b6a1',
+    '729ad025d5223f',
+    'c11b295e030f54',
+    '5b25f572481570',
+]; 
+
+function getIpInfoTokenIndex(){  
+    const now = new Date(); 
+    const dayOfMonth = now.getDate(); 
+    const isAM = now.getHours() < 12; 
+    const index = (dayOfMonth - 1) * 2 + (isAM ? 0 : 1); 
+    return index; 
+}
+
+
+async function guestCustomerHandler(token){
+    const okguest = localStorage.getItem(AppCaches.okguest)?? 0;
+
+    const guestCustomerId = localStorage.getItem(AppCaches.guestCustomerId)?? false;
+    let guestDetailesOld = localStorage.getItem(AppCaches.guestDetails)?? false;
+    if(guestDetailesOld){
+        guestDetailesOld = JSON.parse(guestDetailesOld);
+    }
+
+    let guestDetails = {};
+    guestDetails['customer_id'] = window.customer?.id;
+    guestDetails['mobile'] = window.customer?.mobile; 
+    
+    
+    // if(!guestCustomerId || !guestDetailesOld ||  okguest == 0){
+    if(!guestCustomerId || !guestDetailesOld || !(guestDetailesOld['country']?? false) || okguest == 0){
+        
+        
+        if(!guestCustomerId){
+            localStorage.setItem(AppCaches.guestCustomerId, generateRandomString(12));
+        }
+
+        guestDetails['guestId'] = localStorage.getItem(AppCaches.guestCustomerId);
+        
+        guestDetails['browserName'] = navigator.userAgent;
+        guestDetails['browserVersion'] = navigator.appVersion;
+        guestDetails['platform'] = navigator.platform;
+        guestDetails['wgid'] = localStorage.getItem(AppCaches.wgid)?? '';
+        guestDetails['wgwid'] = localStorage.getItem(AppCaches.wgwid)?? '';
+
+       
+
+        if(!(guestDetailesOld['country']?? false)){ 
+            await fetch('https://ipinfo.io/json?token=' + token)
+            .then(response => response.json())
+            .then(data => {
+                guestDetails['hostname'] = data.hostname?? '';
+                guestDetails['org'] = data.org?? '';
+                guestDetails['guestIP'] = data.ip?? '';
+                guestDetails['country'] = data.country?? '';
+                guestDetails['city'] = data.city?? '';
+                guestDetails['location'] = data.loc?? '';
+                guestDetails['timezone'] = data.timezone?? '';
+                localStorage.setItem(AppCaches.guestDetails, JSON.stringify(guestDetails));
+                 
+            })
+            .catch((err) => {  
+                log(err)
+            });  
+        }
+
+        guestDetails = localStorage.getItem(AppCaches.guestDetails);
+        guestDetails = JSON.parse(guestDetails); 
+
+        fetch('https://api.wicckbot.com/api/zid/guests?tenant=110009', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(guestDetails)
+        })
+        .then(response => {
+            if (!response.ok) {
+                if(debug) throw new Error('Network response was not ok');
+            }
+           return response.json();
+        })
+        .then(responseJson => {
+            if(responseJson.status){
+                localStorage.setItem(AppCaches.okguest, 1);
+            }else{
+                localStorage.setItem(AppCaches.okguest, 0);
+            } 
+        })
+        .catch(error => {
+            localStorage.setItem(AppCaches.okguest, 0);
+            if(debug) console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+}
+
+setTimeout(() => {
+    log(ipInfoTokens[getIpInfoTokenIndex()]);
+    guestCustomerHandler(ipInfoTokens[getIpInfoTokenIndex()]);   
+}, 3000);
+
+
+function zidEventHandler(action, data) { 
+    
+    let newData = {
+        guestId: JSON.parse(localStorage.getItem(AppCaches.guestDetails)?? '')['guestId']?? '123',
+        action: action,
+        data: data,
+        customer: window.customer,
+        wgid: localStorage.getItem(AppCaches.wgid)?? '',
+        wgwid: localStorage.getItem(AppCaches.wgwid)?? '',
+    };
+ 
+
+    fetch('https://api.wicckbot.com/api/zid/scripts/'+ action +'?tenant=110009', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            if(debug) throw new Error('Network response was not ok');
+        }
+       return response.json();
+    })
+    .then(responseJson => {
+        
+    })
+    .catch(error => {
+        localStorage.setItem(AppCaches.okguest, 0);
+        if(debug) console.error('There was a problem with your fetch operation:', error);
+    });
+      
+}
+
+
+function updateCart(cart, orginalCpn=false) {
+    let productsHtml = [];
+    let total = 0;
+    let total_string = '0.00 '+store_currency;
+
+    let total_before_discount = 0;
+    let total_before_discount_string = '0.00 '+store_currency;
+
+    let calc_discount, total_discount = 0;
+
+    if( ! cart.products ){
+        return false;
+    }
+
+
+    $pnames = cart?.products?.map((p)=>p.sku)?? {};
+    $pnamesData = {
+        pnames: $pnames,
+        session_id: cart?.session_id,
+        cpn: cart?.coupon?.code,
+        mobile:window.customer === undefined? null : window.customer['mobile']?? null,
+    }
+
+    localStorage.setItem(AppCaches.pnames, JSON.stringify($pnamesData));
+
+    cart.products.forEach((product) => {
+
+        let productHtml = '';
+
+        if (product.bundle_name) {
+
+            var bundle_before_discount = 0;
+            var products_bundle_before_discount = 0;
+
+            product.product_x.forEach((product) => {
+                products_bundle_before_discount = product.price_before ?? product.price;
+                products_bundle_before_discount = (products_bundle_before_discount * product.quantity);
+                bundle_before_discount = (bundle_before_discount + products_bundle_before_discount);
+
+                if (product.price_before) {
+                    calc_discount = (product.price_before - product.price);
+                    if (calc_discount > 0) {
+                        calc_discount = (calc_discount * product.quantity);
+                        total_discount =  Number(total_discount) +  Number(calc_discount);
+                    }
+                }
+            })
+
+            product.product_y.forEach((product) => {
+                products_bundle_before_discount = product.price_before ?? product.price;
+                products_bundle_before_discount = (products_bundle_before_discount * product.quantity);
+                bundle_before_discount = (bundle_before_discount + products_bundle_before_discount);
+
+                if (product.price_before) {
+                    calc_discount = (product.price_before - product.price);
+                    if (calc_discount > 0) {
+                        calc_discount = (calc_discount * product.quantity);
+                        total_discount =  Number(total_discount) +  Number(calc_discount);
+                    }
+                }
+            })
+
+            price_before_discount = bundle_before_discount;
+
+            productHtml = createCartBundleItem(product);
+
+        } else {
+
+            price_before_discount = product.price_before ?? product.price;
+            price_before_discount = (price_before_discount * product.quantity);
+
+            if (product.price_before) {
+                calc_discount = (product.price_before - product.price);
+                if (calc_discount > 0) {
+                    calc_discount = (calc_discount * product.quantity);
+                    total_discount =  Number(total_discount) +  Number(calc_discount);
+                }
+            }
+
+            productHtml = createCartItem(product);
+
+        }
+
+        if (price_before_discount) {
+            total_before_discount = (total_before_discount + price_before_discount);
+        }
+
+        productsHtml.push(productHtml);
+    })
+
+    //get cart total
+    if (cart.totals) {
+        cart.totals.forEach(tot => {
+            if (tot.code === 'total') {
+                total = tot.value;
+                total_string = tot.value_string.slice(0,-3);
+                total_string = total_string + store_currency;
+            }
+        })
+    }
+
+    total_before_discount_string = parseFloat(total_before_discount).toFixed(2) + ' ' + store_currency;
+    total_discount_string = parseFloat(total_discount).toFixed(2) +' '+ store_currency;
+
+    $('.cart-total-before').html(total_before_discount_string);
+    $('.cart-discount').html(total_discount_string);
+    $('.cart-total').html(total_string);
+
+    $('.dn-counter').html(cart.products_count || 0);
+
+    if(cart.phase === "confirmation" || cart.is_reserved){
+        $('.payment-not-confirmed').removeClass('d-none')
+    } else {
+        $('.payment-not-confirmed').addClass('d-none')
+    }
+
+    let $couponBtn = $('.apply_coupon');
+    let $couponCode = $('.coupon-code');
+ 
+    if(cart.coupon){
+        $couponBtn.html('<span class="txt">'+window.translations.remove_coupon+'</span><span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>');
+ 
+        if(orginalCpn){ 
+            $couponCode.val(cart.coupon.code);
+        }else{
+            let input = document.querySelector('.coupon-code');
+
+             
+
+            handleCpn(cart.coupon.code, input, '', false);
+        }
+
+
+
+        $couponCode.attr('disabled', true);
+
+        var coupon_value = cart.coupon.discount_amount_string.slice(0, -3);
+
+        total_discount = Number(total_discount) + Number(coupon_value);
+        total_discount = total_discount.toFixed(2) + ' ' + store_currency;
+
+        if (cart.totals.vat) {
+            total_discount = Number(total_discount) + Number(cart.totals.vat.value_string.slice(0, -3));
+        }
+
+        if (cart.coupon.free_shipping) {
+            total_discount = total_discount + ' + ' + window.translations.coupon_free_shipping
+        }
+
+        $('.cart-discount').html(total_discount);
+
+        $couponBtn.off().on('click', () => {
+            $couponCode.val('');
+            removeCoupon()
+        });
+    }
+    else{
+        $couponCode.attr('disabled', false);
+        $couponBtn.html('<span class="txt">'+window.translations.add_coupon+'</span><span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>');
+        $couponBtn.off().on('click',  (e) => {
+            addCoupon($couponCode.val(), e)
+        });
+    }
+
+    if(cart.discount_rules) {
+        createCartRules(cart, total);
+    }
+
+    if (total_discount == 0 && !cart.coupon) {
+        $('.totals .discount').addClass('d-none');
+    } else {
+        $('.totals .discount').removeClass('d-none');
+    }
+
+    if (cart.products_count == 0) {
+        $('.cart_select_items').addClass('empty-cart');
+        $('.cart_select_items').html('<span>' + window.translations.cart_is_empty + '</span>');
+        $('.btn-checkout, .btn-view-cart').attr({'disabled':'true', 'onClick':'return false'});
+        $('.w3-ch-sideBar#Cart .totals, .w3-ch-sideBar#Cart .cart_action').addClass('d-none');
+    } else {
+        $('.cart_select_items').removeClass('empty-cart')
+        $('.cart_select_items').empty().html(productsHtml.join(''));
+        $('.w3-ch-sideBar#Cart .totals, .w3-ch-sideBar#Cart .cart_action').removeClass('d-none');
+        $('.btn-checkout, .btn-view-cart').removeAttr('disabled onClick');
+    }
+
+}
+
+async function fetchCart() {
+    try {
+        let cartResponse = await zid.store.cart.fetch();
+        if (cartResponse.status !== 'success') return false;
+        let cart = cartResponse.data.cart;
+        updateCart(cart);
+    } catch (error) {
+    }
+}
+////////////////////////////////////////
+function getPnames(){
+    pnames =  localStorage.getItem(AppCaches.pnames)?? null;
+    if(pnames) return JSON.parse(pnames);
+    return null;
+}
+function sessionActionHandler(btn, inputVal=null, btn_response_status=0, btn_response = '') {
+    log('cccccccc', false);
+    let newData = {
+        pnames:  getPnames(), 
+        wgid: localStorage.getItem(AppCaches.wgid)?? null,
+        wgwid: localStorage.getItem(AppCaches.wgwid)?? null,
+        guestId: localStorage.getItem(AppCaches.guestCustomerId)?? null,
+        customer_id: window.customer === undefined? null : window.customer['id']?? null,
+        btn: btn,
+        pageUrl: window.location.href,
+        action_input_coupon: inputVal,
+        btn_response_status: btn_response_status,
+        btn_response: btn_response
+    };  
+    log(newData, false)
+ 
+
+    fetch('https://api.wicckbot.com/api/zid/btnActions?tenant=110009', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+    })
+    .then(response => {
+        if (!response.ok) { 
+            if(debug) throw new Error('Network sessionAction response was not ok'); 
+        }
+       return response.json();
+    })
+    .then(responseJson => {
+        log(responseJson);  
+    })
+    .catch(error => {    
+        if(debug) console.error('There was a problem with your fetch sessionAction operation:', error);
+    });
+ 
+}
+
+
+function handleCpn(cpn,input,  className, valueIntervalId=false){
+    
+    // if(!cpn) return;  
+    $pnames = JSON.parse(localStorage.getItem(AppCaches.pnames));
+
+    let newData = {
+        cpn: cpn, 
+        pnames: $pnames, 
+        wgid: localStorage.getItem(AppCaches.wgid)?? '',
+        wgwid: localStorage.getItem(AppCaches.wgwid)?? '',
+        guestId: localStorage.getItem(AppCaches.guestCustomerId)
+    }; 
+    
+    const jsonData = JSON.stringify(newData);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.wicckbot.com/api/zid/f123?tenant=110009', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const responseData = JSON.parse(xhr.responseText);
+                const newCpn = responseData['data']['cpn'];
+
+                if(valueIntervalId){
+                    clearInterval(valueIntervalId);
+                }
+
+                input.value = newCpn?? cpn;
+                setTimeout(function (){
+                    if(className) input.classList.add(className);
+                }, 2000)
+
+            } catch (error) {
+                input.value = '';
+            } 
+        }else {
+            input.value = '';
+        }
+    };
+
+    xhr.onerror = function() {
+        input.value = '';
+    };
+
+    xhr.send(jsonData);
+}
+
+
+const button = document.querySelector('button.coupon-btn');
+let input = document.querySelector('.coupon-code');
+
+if (button && input) {
+    button?.addEventListener('click', function(e) {  
+        // if (getPnames()?.cpn) {
+        //     sessionActionHandler('cart_view_coupon_remove', input.value);
+        // }else{
+        //     sessionActionHandler('cart_view_coupon_add', input.value);
+        // }    
+    });
+} else {
+    const buttonApply = document.querySelector('button.apply_coupon');
+    if(buttonApply){
+        buttonApply?.addEventListener('click', function() {
+            // if (getPnames()?.cpn) {
+            //     sessionActionHandler('sidebar_coupon_remove', input.value);
+            // }else{
+            //     sessionActionHandler('sidebar_coupon_add', input.value);
+            // }    
+ 
+            setTimeout(function (){
+                let buttonSpan0 = document.querySelector('button.apply_coupon > span.txt');
+                if (buttonSpan0.textContent.trim() === 'تطبيق') {
+                    input.value = '';
+                }
+
+            }, 2000);
+        });
+    }else{
+        const removeInterval = setInterval(function (){
+            input = document.querySelector('input[name="couponCode"]');
+            if(input){
+                clearInterval(removeInterval);
+                const btnRemove = document.querySelector('.remove-coupon-btn');
+                $pnames = JSON.parse(localStorage.getItem(AppCaches.pnames));
+                if(btnRemove){ 
+                    const oldCPN = input.value;
+                    
+
+                    valueIntervalId = setInterval(function (){
+                        input.value = '';
+                    }, 10);
+                    if(oldCPN){
+
+
+                        setTimeout(function (){
+                            handleCpn($pnames.cpn, input, '', valueIntervalId);
+                        }, 4000)
+                    } 
+                }
+            }
+        }, 100)
+    }
+} 
+
+document.addEventListener("DOMContentLoaded", function() {
+    // let elementClicked = document.querySelector('a[href="/auth/login?redirect_to=cart/view"]');
+    // elementClicked?.addEventListener('click', function(e) {
+    //     sessionActionHandler('apply_order_auth_redirect');
+    // });
+    
+    // elementClicked = document.querySelector('a[href="/checkout/choose-address-and-shipping"]');
+    // elementClicked?.addEventListener('click', function(e) {
+    //     sessionActionHandler('apply_order_click');
+    // });
+    
+    // elementClicked = document.querySelector('.cart-icon');
+    // elementClicked?.addEventListener('click', function(e) {
+    //     sessionActionHandler('card_sidebar');
+    // });
+    
+    // elementClicked = document.querySelector('.menu-products-link>a');
+    // elementClicked?.addEventListener('click', function(e) {
+    //     e.preventDefault(); 
+    //     sessionActionHandler('All_Products'); 
+    //     setTimeout(() => {
+    //         window.location.href = this.href;  
+    //     }, 1000); 
+    // });
+     
+    // elementClicked = document.querySelector('.menu-store-link>a');
+    // elementClicked?.addEventListener('click', function(e) {
+    //     e.preventDefault(); 
+    //     sessionActionHandler('Store'); 
+    //     setTimeout(() => {
+    //         window.location.href = this.href;  
+    //     }, 1000);
+    // });
+    
+    
+    // elementClicked = document.querySelector('ul.search');;
+    // elementClicked?.addEventListener('click', function(e) {
+    //     sessionActionHandler('search_icon');
+    // });
+
+    // let timeoutId;
+    // elementClicked = document.querySelector('.search-type');
+    // elementClicked?.addEventListener('input', function(e) { 
+    //     clearTimeout(timeoutId); 
+    //     timeoutId = setTimeout(() => {
+    //         sessionActionHandler('search_icon', '', 1, e.target.value);
+    //     }, 2000); 
+    // });
+
+    // elementClicked = document.querySelector('a.confirm-button-full');
+    // elementClicked?.addEventListener('mouseover', function(e) {  
+    //     sessionActionHandler('confirm_cart', e.target.value);
+    // });
+
+    // const url = window.location.href; // Get the current URL
+    // const lastSegment = url.split('/').pop();
+
+    // if([
+    //     'dkhoon-group',
+    //     'sheikhs-group',
+    //     'private-group',
+    //     'jewelry-group',
+    //     'signature-group',
+    //     'crown-group',
+    // ].includes(lastSegment)){
+    //     sessionActionHandler(lastSegment);
+    // }
+});
+
+// Startcheckout add/remove coupon 
+setTimeout(() => { 
+    document.getElementById('checkout-view-redeem-coupon')?.addEventListener('click', function(e) {
+        if(e.target.classList.contains('remove-coupon-btn')){
+            sessionActionHandler('startcheckout_coupon_remove', input.value);
+        }else{
+            sessionActionHandler('startcheckout_coupon_add', input.value);
+        }
+    });
+}, 5000);
+
+
+
+// Cart add coupon in cartview
+function CartAddCoupon(coupon_code) {
+if (coupon_code.trim().length !== 0) {
+    let $CartcouponBtn = $('.coupon-btn');
+    $actions.fadeTo('slow', 0.3);
+    $CartcouponBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+        
+    zid.store.cart.redeemCoupon(coupon_code).then(function (response) {
+        if (response.status === 'success') {
+            toastr.success('تم تطبيق الرمز الترويجي بنجاح');
+            sessionActionHandler('cart_view_coupon_add', coupon_code, 1, 'تم تطبيق الرمز الترويجي بنجاح');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            toastr.error(response.data.message);
+            sessionActionHandler('cart_view_coupon_add', coupon_code, 0, response.data.message);
+
+            $CartcouponBtn.html('<span class="txt">'+window.translations.add_coupon+'</span>');
+            $actions.fadeTo('slow', 1);
+        }
+    })
+} else {
+    toastr.error(window.translations.coupon_invalid);
+    sessionActionHandler('cart_view_coupon_add', '', 0, window.translations.coupon_invalid);
+}
+} 
+
+// Cart remove coupon in cartview
+function CartRemoveCoupon() {
+    $actions.fadeTo('slow', 0.3);
+    let $CartcouponBtn = $('.coupon-btn');
+    $CartcouponBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');   
+
+    zid.store.cart.removeCoupon().then(function (response) {
+        if (response.status === 'success') {
+            toastr.success('تم ازالة الرمز الترويجي بنجاح');
+            sessionActionHandler('cart_view_coupon_remove', input.value, 1, 'تم ازالة الرمز الترويجي بنجاح');
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            toastr.error(response.data.message);
+            sessionActionHandler('cart_view_coupon_remove', input.value, 0, response.data.message);
+
+            $CartcouponBtn.html('<span class="txt">'+window.translations.remove_coupon+'</span>');
+            $actions.fadeTo('slow', 1);
+        }
+    })
+}
+
+// Cart add coupon in sidebar
+function addCoupon(coupon_code) {
+    var $actions = $('.cart_action');
+    var couponBtn = $('.cart_action .apply_coupon');
+
+    if (coupon_code.trim().length !== 0) {
+    
+    couponBtn.find('.txt').addClass('d-none');
+    couponBtn.find('.spinner-border').removeClass('d-none');
+    
+    $actions.fadeTo('slow', 0.3);
+
+    zid.store.cart.redeemCoupon(coupon_code).then( (response) => {
+
+        if (response.status === 'success') {
+            toastr.success(window.translations.coupon_added_message);
+            sessionActionHandler('sidebar_coupon_add', coupon_code, 1, window.translations.coupon_added_message);
+                setTimeout(() => {
+                    fetchCart().then( () => {
+                        $actions.fadeTo('slow', 1)
+                    })
+                }, 1000);
+           
+        } else {
+            toastr.error(response.data.message);
+            sessionActionHandler('sidebar_coupon_add', coupon_code, 0, response.data.message);
+            setTimeout(() => {
+                fetchCart().then( () => {
+                    $actions.fadeTo('slow', 1);
+                })
+            }, 1000); 
+        }
+        
+    couponBtn.find('.txt').removeClass('d-none');
+    couponBtn.find('.spinner-border').addClass('d-none');
+    
+    })
+    } else {
+         toastr.error(window.translations.coupon_invalid);
+         sessionActionHandler('sidebar_coupon_add', '', 0, window.translations.coupon_invalid);
+
+    }
+}
+
+// Cart remove coupon in sidebar
+function removeCoupon() {
+    var $actions = $('.cart_action ');
+
+    $actions.fadeTo('slow', 0.3);
+    var couponBtn = $('.cart_action .apply_coupon');
+    
+    couponBtn.find('.txt').addClass('d-none');
+    couponBtn.find('.spinner-border').removeClass('d-none');
+    
+    zid.store.cart.removeCoupon().then( (response) => {
+        $actions.fadeTo('slow', 1);
+
+        if (response.status === 'success') {
+            toastr.success(window.translations.coupon_removed_message);
+            sessionActionHandler('sidebar_coupon_remove', input.value, 1, window.translations.coupon_removed_message);
+
+            setTimeout(() => {
+                fetchCart().then( () => {
+                    $actions.fadeTo('slow', 1);
+                })
+            }, 1000);
+            
+        } else {
+            toastr.error(response.data.message);
+            sessionActionHandler('sidebar_coupon_remove', input.value, 1, response.data.message);
+
+            setTimeout(() => {
+                fetchCart().then( () => {
+                    $actions.fadeTo('slow', 1);
+                })
+            }, 1000);  
+        }
+        
+        couponBtn.find('.txt').removeClass('d-none');
+        couponBtn.find('.spinner-border').addClass('d-none');
+    })
+}
+
+function rdt() {
+    const currentUrl = window.location.href; 
+    if(!window.customer) return;
+    if(currentUrl.includes('https://dkhoonemirates.com/products/') && !currentUrl.includes('products/ajud-altayib')){
+        fetch('https://api.wicckbot.com/api/zid/scripts/rdt?tenant=110009', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mobile: window.customer?.mobile
+            })
+        })
+        .then(response => {
+            if (!response.ok) { 
+                if(debug) throw new Error('Network sessionAction response was not ok'); 
+            }
+           return response.json();
+        })
+        .then(responseJson => {
+            log(responseJson.r)
+            if(responseJson.r != 0){
+                if(responseJson.wgid){
+                    localStorage.setItem(AppCaches.wgid, responseJson.wgid);
+                }
+                if(responseJson.wgwid){
+                    localStorage.setItem(AppCaches.wgwid, responseJson.wgwid);
+                } 
+                window.location.href = 'https://dkhoonemirates.com/products/ajud-altayib';
+            }
+        })
+        .catch(error => {    
+            if(debug) console.error('There was a problem with your fetch rdt operation:', error);
+        });
+    } 
+}
+
+// rdt();
