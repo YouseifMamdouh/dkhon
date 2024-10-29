@@ -16,14 +16,14 @@ import slider6 from '../imaeags/sliderfor.png';
 import slider7 from '../imaeags/dce5ff4e-7903-413f-a92c-2a15e84b4234-thumbnail-1000x1000.png';
 import slider11 from '../imaeags/rr.jpg'
 import slider12 from '../imaeags/qq.jpg';
-import slider13 from '../imaeags/sliderTow.png';
-import slider14 from '../imaeags/for.png';
+// import slider13 from '../imaeags/sliderTow.png';
+// import slider14 from '../imaeags/for.png';
 import slider15 from '../imaeags/fif.png';
 import slider16 from '../imaeags/x.png';
 import slider17 from '../imaeags/ww.png';
 import slider18 from '../imaeags/ee.png';
 import slider19 from '../imaeags/tt.png';
-import slider20 from '../imaeags/yy.png';
+// import slider20 from '../imaeags/yy.png';
 import slider44 from '../imaeags/ngam.jpg';
 import slider45 from '../imaeags/adr.jpg';
 import slider36 from '../imaeags/bkhor.png';
